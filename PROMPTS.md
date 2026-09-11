@@ -148,3 +148,39 @@ mock-api 작업 시작하자. 바로 짜지 말고 어떤 API를 만들어야 �
 
 - 반환값 지원자 하나 / 에러 `ApiError { code, status, retryable }` / 지연 호출마다 랜덤 + 주입 / 롤백 항목 단위
 - AI 초안 그대로 채택, 코드 수정 없음
+
+---
+
+## [board-layout] 5단계 컬럼 레이아웃 · TanStack Query 연결
+
+### 프롬프트 1
+
+```
+board-layout 가자. 5단계 컬럼 레이아웃만 먼저.
+
+- TanStack Query 붙여서 fetchCandidates 연결, 로딩은 Suspense 폴백(스켈레톤)으로
+- 컬럼 헤더에 단계명이랑 건수
+- 카드는 아직 안 그려도 돼, 다음 단위에서
+- 모바일에선 컬럼 가로 스크롤
+
+폴더 구조 어떻게 잡을지 먼저 보여주고 시작해.
+```
+
+### AI 출력 요지
+
+- 폴더 구조안 2개(기능별 vs 평평한 구조) 제시 → 기능별로 확정. `app/App.tsx · queryClient.ts`, `features/board/{Board, BoardColumn, BoardSkeleton, queries, groupByStage, useCandidates}`.
+- `queryOptions`로 key·fetch를 한 곳에 두어 이후 이동·무효화가 같은 key를 쓰게 함. `retry: false` 제안.
+- 컬럼은 `region` + `aria-labelledby`, 스켈레톤은 `role=status`. 모바일은 flex + overflow-x + snap, md 이상은 5열 grid.
+- 테스트 3개: groupByStage(빈 입력에도 다섯 키, 순서 유지), Board(스켈레톤 → 5 region → 컬럼별 건수).
+
+### 리뷰 / 검증
+
+- 문제: 데스크톱에서 페이지가 가로로 넘침 — 컬럼 `min-w-72`가 md 이상 grid에도 걸려 5열 합 1440px. 알아챈 방법: 브라우저 스크린샷에서 5열이 잘려 보여 `scrollWidth`(1078) > `clientWidth`(976) 측정. jsdom 테스트는 레이아웃을 못 잡음. 판단: **수정** — `md:min-w-0`. 재확인: 데스크톱 5열 185px 넘침 없음, 모바일(375px) 288px 가로 스크롤·스냅 정상.
+- 문제: `groupByStage` 초기값을 `Object.fromEntries(...) as` 캐스트 → TS2352. 알아챈 방법: typecheck. 판단: **수정** — 다섯 키 명시 리터럴. 단계가 늘면 누락을 TS가 잡아서 캐스트보다 낫다.
+- OCR 교차 리뷰: Medium 2건. ① Board·BoardSkeleton의 컨테이너 클래스 중복 → **유지**, 규칙대로 3번째에 추출. ② ErrorBoundary 부재로 조회 실패 시 빈 화면 → **계획대로 9번 단위**.
+- HTML diff 리뷰: 파일 10개.
+
+### 판단
+
+- 폴더 구조 기능별(`features/<단위>/`), Query `retry: false`
+- 컨테이너 클래스 중복은 3번째까지 유지, ErrorBoundary는 9번 단위
