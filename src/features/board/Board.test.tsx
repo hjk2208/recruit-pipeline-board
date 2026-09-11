@@ -42,4 +42,15 @@ describe('Board', () => {
     expect(screen.getByRole('region', { name: '불합격' })).toHaveTextContent('1')
     expect(screen.getByRole('region', { name: '면접' })).toHaveTextContent('0')
   })
+
+  it('카드는 자기 단계의 컬럼 안에만 있다', async () => {
+    renderBoard()
+    await screen.findByRole('heading', { name: '서류검토' })
+    const docs = screen.getByRole('region', { name: '서류검토' })
+    const rejected = screen.getByRole('region', { name: '불합격' })
+    expect(docs).toHaveTextContent('김서준')
+    expect(docs).toHaveTextContent('이지우')
+    expect(docs).not.toHaveTextContent('박하은')
+    expect(rejected).toHaveTextContent('박하은')
+  })
 })

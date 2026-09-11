@@ -7,7 +7,7 @@ import { queryClient } from './queryClient'
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <main className="flex min-h-screen flex-col gap-6 bg-surface-muted p-6 text-text">
+      <main className="flex h-screen flex-col gap-6 bg-surface-muted p-6 text-text">
         <h1 className="text-xl font-semibold">채용 파이프라인 보드</h1>
         <Suspense fallback={<BoardSkeleton />}>
           <Board />
