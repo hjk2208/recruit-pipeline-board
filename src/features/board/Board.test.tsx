@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { Suspense } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import type { Candidate } from '../../api'
+import { api, type Candidate } from '../../api'
 import { Board } from './Board'
 import { BoardSkeleton } from './BoardSkeleton'
 
@@ -52,5 +53,16 @@ describe('Board', () => {
     expect(docs).toHaveTextContent('이지우')
     expect(docs).not.toHaveTextContent('박하은')
     expect(rejected).toHaveTextContent('박하은')
+  })
+
+  it('셀렉트로 단계를 옮기면 카드가 그 컬럼으로 간다', async () => {
+    vi.mocked(api.moveCandidate).mockImplementation(async (id, to) => ({ ...list.find((c) => c.id === id)!, stage: to }))
+    renderBoard()
+    await screen.findByRole('heading', { name: '서류검토' })
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: '김서준 단계 이동' }), '면접')
+    const interview = screen.getByRole('region', { name: '면접' })
+    expect(await within(interview).findByText('김서준')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '서류검토' })).not.toHaveTextContent('김서준')
+    expect(interview).toHaveTextContent('1')
   })
 })

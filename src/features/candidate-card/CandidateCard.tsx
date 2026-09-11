@@ -1,4 +1,5 @@
 import type { Candidate } from '../../api'
+import { StageSelect } from '../stage-move/StageSelect'
 import { StageBadge } from './StageBadge'
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
 
 /**
  * 카드 자체는 li. 포커스 대상은 이름 버튼 — 카드 전체를 button으로 만들면
- * 나중에 단계 이동 select를 안에 넣을 수 없다(인터랙티브 요소 중첩 금지).
+ * 단계 이동 select를 안에 넣을 수 없다(인터랙티브 요소 중첩 금지).
  */
 export function CandidateCard({ candidate }: Props) {
   const metaId = `card-meta-${candidate.id}`
@@ -26,6 +27,9 @@ export function CandidateCard({ candidate }: Props) {
       <p id={metaId} className="mt-1 text-xs text-text-muted">
         {candidate.role} · <time dateTime={candidate.appliedAt}>{candidate.appliedAt}</time> 지원
       </p>
+      <div className="mt-2 flex justify-end">
+        <StageSelect candidate={candidate} />
+      </div>
     </li>
   )
 }
