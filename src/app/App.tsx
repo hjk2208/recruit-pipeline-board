@@ -2,6 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { Board } from '../features/board/Board'
 import { BoardSkeleton } from '../features/board/BoardSkeleton'
+import { Toaster } from '../features/toast/Toaster'
 import { queryClient } from './queryClient'
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
         <Suspense fallback={<BoardSkeleton />}>
           <Board />
         </Suspense>
+        <Toaster />
       </main>
     </QueryClientProvider>
   )
