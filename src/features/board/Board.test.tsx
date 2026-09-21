@@ -74,6 +74,7 @@ describe('Board', () => {
     expect(screen.getByRole('region', { name: '서류검토' })).toHaveTextContent('이지우')
 
     await userEvent.selectOptions(screen.getByRole('combobox', { name: '직무 필터' }), '프론트엔드')
-    await waitFor(() => expect(screen.getByRole('region', { name: '서류검토' })).toHaveTextContent('0'))
+    // 이지우(백엔드)는 프론트엔드 필터에 걸려 0건 → 컬럼 대신 안내 문구
+    expect(await screen.findByText(/조건에 맞는 지원자가 없습니다/)).toBeInTheDocument()
   })
 })

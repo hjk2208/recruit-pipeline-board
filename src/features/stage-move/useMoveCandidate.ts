@@ -42,6 +42,7 @@ export function useMoveCandidate() {
       toast.error(
         `${name} 이동에 실패해 원래 단계로 되돌렸습니다.`,
         retryable ? { label: '재시도', onClick: () => mutation.mutate(vars) } : undefined,
+        vars.id,
       )
     },
 
