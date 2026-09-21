@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Suspense } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -64,5 +64,16 @@ describe('Board', () => {
     expect(await within(interview).findByText('김서준')).toBeInTheDocument()
     expect(screen.getByRole('region', { name: '서류검토' })).not.toHaveTextContent('김서준')
     expect(interview).toHaveTextContent('1')
+  })
+
+  it('이름 검색과 직무 필터가 동시에 걸린다', async () => {
+    renderBoard()
+    await screen.findByRole('heading', { name: '서류검토' })
+    await userEvent.type(screen.getByRole('searchbox', { name: '이름 검색' }), '지우')
+    await waitFor(() => expect(screen.getByRole('region', { name: '서류검토' })).not.toHaveTextContent('김서준'))
+    expect(screen.getByRole('region', { name: '서류검토' })).toHaveTextContent('이지우')
+
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: '직무 필터' }), '프론트엔드')
+    await waitFor(() => expect(screen.getByRole('region', { name: '서류검토' })).toHaveTextContent('0'))
   })
 })
