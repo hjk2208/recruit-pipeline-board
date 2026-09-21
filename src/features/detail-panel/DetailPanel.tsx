@@ -17,13 +17,33 @@ export function DetailPanel() {
   const queryClient = useQueryClient()
   const candidate = queryClient.getQueryData(candidatesQueryOptions.queryKey)?.find((c) => c.id === selectedId)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const asideRef = useRef<HTMLElement>(null)
   const isOpen = Boolean(candidate)
+  // 모바일 전체 화면 시트는 모달로 알린다(포커스 트랩과 짝). md 이상은 보드를 계속 조작할 수 있어 non-modal
+  const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
 
   useEffect(() => {
     if (!isOpen) return
     closeRef.current?.focus()
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
+      if (e.key === 'Escape') return close()
+      // 모바일 전체 화면 시트는 뒤가 안 보이므로 포커스를 안에 가둔다. md 이상은 non-modal
+      if (e.key !== 'Tab' || window.matchMedia('(min-width: 768px)').matches) return
+      const root = asideRef.current
+      if (!root) return
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>('button, a[href], select, input, [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => !el.hasAttribute('disabled'))
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
@@ -40,8 +60,9 @@ export function DetailPanel() {
         }`}
       />
       <aside
+        ref={asideRef}
         role="dialog"
-        aria-modal="false"
+        aria-modal={isOpen && !isDesktop ? "true" : "false"}
         aria-labelledby="detail-title"
         aria-hidden={!isOpen}
         className={`fixed inset-0 z-20 flex flex-col overflow-y-auto bg-surface p-5 transition-[translate,width,opacity] duration-200 ease-out motion-reduce:transition-none
