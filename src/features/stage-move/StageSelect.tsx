@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function StageSelect({ candidate }: Props) {
-  const move = useMoveCandidate()
+  const move = useMoveCandidate(candidate.id)
   const ref = useRef<HTMLSelectElement>(null)
 
   // 다른 컬럼으로 옮겨져 리마운트된 경우 포커스를 되찾는다 (키보드 조작 연속성)

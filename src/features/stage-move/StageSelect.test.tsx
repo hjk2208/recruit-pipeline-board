@@ -100,4 +100,46 @@ describe('StageSelect — 낙관적 업데이트', () => {
     await waitFor(() => expect(screen.getByRole('combobox', { name: '이지우 단계 이동' })).toBeEnabled())
     expect(stageOf(client, 'c2')).toBe('처우협의')
   })
+
+  it('같은 카드를 빠르게 두 번 옮기고 두 번째가 실패하면, 서버가 확정한 첫 번째 결과로 돌아간다', async () => {
+    const calls = controllable()
+    const client = setup(c) // 서류검토
+    const select = screen.getByRole('combobox', { name: '김서준 단계 이동' })
+
+    await userEvent.selectOptions(select, '면접') // 1차: 서류검토 → 면접 (진행 중)
+    expect(stageOf(client, 'c1')).toBe('면접')
+
+    // 2차: 면접 → 처우협의. 1차가 아직 안 끝났다.
+    // 카드 셀렉트는 진행 중 disabled지만, 상세 패널의 셀렉트로 같은 카드를 또 옮길 수 있다 — 그 경로를 흉내 낸다
+    ;(select as HTMLSelectElement).disabled = false
+    await userEvent.selectOptions(select, '처우협의')
+    expect(stageOf(client, 'c1')).toBe('처우협의')
+
+    // 1차 성공(서버: 면접) → 그 뒤에야 2차가 나간다(카드별 직렬화)
+    calls[0].resolve({ ...c, stage: '면접', updatedAt: '2026-09-11T10:00:00.000Z' })
+    await waitFor(() => expect(calls.length).toBe(2))
+    calls[1].reject(new ApiError('NETWORK', 503, true, '네트워크 오류'))
+    await waitFor(() => expect(select).toBeEnabled()) // 두 요청 모두 정산된 뒤에 확인
+
+    expect(stageOf(client, 'c1')).toBe('면접') // 서버가 확정한 값
+  })
+
+  it('같은 카드 두 번 이동 중 둘 다 실패하면 원래 단계(서류검토)로 돌아간다', async () => {
+    const calls = controllable()
+    const client = setup(c)
+    const select = screen.getByRole('combobox', { name: '김서준 단계 이동' })
+
+    await userEvent.selectOptions(select, '면접')
+    ;(select as HTMLSelectElement).disabled = false
+    await userEvent.selectOptions(select, '처우협의')
+    expect(stageOf(client, 'c1')).toBe('처우협의')
+
+    calls[0].reject(new ApiError('NETWORK', 503, true, '1차 실패'))
+    await waitFor(() => expect(calls.length).toBe(2))
+    calls[1].reject(new ApiError('NETWORK', 503, true, '2차 실패'))
+    await waitFor(() => expect(select).toBeEnabled()) // 두 요청 모두 정산된 뒤에 확인
+
+    // 직렬화 전에는 2차의 "이전 단계"가 1차의 낙관적 값(면접)이라 서버(서류검토)와 어긋났다
+    expect(stageOf(client, 'c1')).toBe('서류검토')
+  })
 })
