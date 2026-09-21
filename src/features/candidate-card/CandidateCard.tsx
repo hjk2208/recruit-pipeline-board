@@ -1,4 +1,5 @@
 import type { Candidate } from '../../api'
+import { useDetailStore } from '../detail-panel/detailStore'
 import { StageSelect } from '../stage-move/StageSelect'
 import { StageBadge } from './StageBadge'
 
@@ -12,12 +13,15 @@ interface Props {
  */
 export function CandidateCard({ candidate }: Props) {
   const metaId = `card-meta-${candidate.id}`
+  const open = useDetailStore((s) => s.open)
   return (
     <li className="rounded-md border border-border bg-surface p-3 shadow-xs transition-colors hover:border-primary/50">
       <div className="flex items-start justify-between gap-2">
         <button
           type="button"
           aria-describedby={metaId}
+          aria-haspopup="dialog"
+          onClick={(e) => open(candidate.id, e.currentTarget)}
           className="rounded text-left text-sm font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {candidate.name}
