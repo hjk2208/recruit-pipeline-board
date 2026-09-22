@@ -600,6 +600,12 @@ search-filter 가자. 보드 위에 검색이랑 필터.
 - 가상 스크롤은 남기고 이유 기록. 1차 마무리 커밋 후 진행
 - Vercel 배포 후 README에 링크. mock 오버라이드 스위치가 배포본에서도 동작하는지 확인
 
+### 2차 마무리 (가상 스크롤 완료 후)
+
+- 인수 기준 32개 전부 체크. 테스트 75. README·DECISIONS·PLAN을 가상 스크롤 완료 상태로 동기화, "못 끝낸 기능: 없음".
+- 커밋 21 ↔ PROMPTS 섹션 16 — setup은 [harness]에, fix(stage-move)·docs(readme)는 [wrap-up]에 함께 기록.
+- Vercel 재배포 후 `?seed=1000`에서 가상화 동작 확인.
+
 ---
 
 ## [virtualization] 1,000건 가상 스크롤
