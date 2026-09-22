@@ -17,7 +17,7 @@ const c: Candidate = {
 function renderCard() {
   return render(
     <QueryClientProvider client={new QueryClient()}>
-      <ul><CandidateCard candidate={c} /></ul>
+      <CandidateCard candidate={c} />
     </QueryClientProvider>,
   )
 }

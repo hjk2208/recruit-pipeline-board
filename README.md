@@ -11,7 +11,7 @@ pnpm install
 pnpm dev        # http://localhost:5173
 ```
 
-`pnpm test` 테스트(70개) · `pnpm typecheck` · `pnpm lint` · `pnpm build`
+`pnpm test` 테스트(75개) · `pnpm typecheck` · `pnpm lint` · `pnpm build`
 
 ## 확인해 볼 것
 
@@ -23,6 +23,7 @@ pnpm dev        # http://localhost:5173
 | 되돌리기 | 이동 성공 토스트의 [되돌리기] |
 | 키보드만으로 | Tab → 카드 이름에서 ↑/↓(같은 컬럼) ←/→(옆 컬럼), Enter 상세, Esc 닫기, 셀렉트로 이동 |
 | 모바일 | 창 폭 768px 미만: 컬럼 가로 스크롤, 상세는 전체 화면 시트 |
+| 1,000건 | `?seed=1000` — 컬럼 가상 스크롤, 키보드 탐색은 화면 밖 카드까지 |
 | 데이터 초기화 | `?reset` (localStorage 비우고 250건 다시 생성) |
 
 `?failRate` `?delay` `?seed` `?reset`은 개발·검증용 스위치다 — [`src/api/mock/devOverrides.ts`](src/api/mock/devOverrides.ts).
@@ -41,7 +42,7 @@ src/
     mock/              mock 구현체 — seed 250건, 지연·실패율·저장소 주입 가능, localStorage 영속
   app/                 Provider 조립, QueryClient 설정
   features/
-    board/             컬럼 레이아웃, 목록 쿼리, 단계별 그룹핑
+    board/             컬럼 레이아웃(가상 스크롤), 목록 쿼리, 단계별 그룹핑, 키보드 탐색
     candidate-card/    카드
     stage-move/        단계 이동 — 낙관적 반영·항목 단위 롤백(optimistic.ts)·같은 카드 직렬화·되돌리기
     search-filter/     이름 검색 + 직무 필터 (순수 함수 + useDeferredValue)
@@ -67,9 +68,10 @@ src/
 - **상세는 뷰포트별 형태 전환** — 1280px 이상 사이드 패널, 미만 백드롭 오버레이, 모바일 전체 화면 시트.
 - 전체 목록: [DECISIONS.md](DECISIONS.md)
 
+- **1,000건은 컬럼 가상 스크롤 + 카드 memo** — 병목은 스크롤이 아니라 커밋이었다(필터 150ms → 38ms, 이동 250ms → 17ms). 키보드 탐색은 DOM에 없는 카드도 인덱스로 찾아 스크롤 후 포커스.
+
 ## 안 한 것
 
-- **1,000건 가상 스크롤** — 250건에서 컬럼 스크롤 프레임 평균 8ms로 충분해 후순위. 1차 마무리 후 진행 예정.
 - 드래그앤드롭, 카드 생성·삭제·편집, 라우팅 — 요구사항 밖.
 
 ## 문서

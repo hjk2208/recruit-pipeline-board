@@ -22,4 +22,4 @@
 |---|---|---|
 | 12 | race-condition | 카드별 mutation 직렬화 (TanStack Query `scope`) + 테스트 |
 | 13 | undo | 마지막 이동 역이동 (토스트에 되돌리기 버튼) |
-| 14 | virtualization | 1,000건 seed 토글 + 컬럼 가상 스크롤 |
+| 14 | virtualization | 1,000건 seed 토글 + 컬럼 가상 스크롤 ✅ |

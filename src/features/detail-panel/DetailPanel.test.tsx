@@ -21,7 +21,7 @@ function setup() {
   client.setQueryData(candidatesQueryOptions.queryKey, [a, b])
   render(
     <QueryClientProvider client={client}>
-      <ul><CandidateCard candidate={a} /><CandidateCard candidate={b} /></ul>
+      <CandidateCard candidate={a} /><CandidateCard candidate={b} />
       <DetailPanel />
     </QueryClientProvider>,
   )
