@@ -142,4 +142,35 @@ describe('StageSelect — 낙관적 업데이트', () => {
     // 직렬화 전에는 2차의 "이전 단계"가 1차의 낙관적 값(면접)이라 서버(서류검토)와 어긋났다
     expect(stageOf(client, 'c1')).toBe('서류검토')
   })
+
+  it('성공하면 되돌리기 토스트가 뜨고, 누르면 이전 단계로 다시 이동한다(낙관적·persist)', async () => {
+    const calls = controllable()
+    const client = setup(c)
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: '김서준 단계 이동' }), '면접')
+    calls[0].resolve({ ...c, stage: '면접' })
+    const undo = await screen.findByRole('button', { name: '되돌리기' })
+    expect(screen.getByRole('status')).toHaveTextContent('김서준을(를) 면접(으)로 옮겼습니다.')
+
+    await userEvent.click(undo)
+    expect(calls).toHaveLength(2)
+    expect(calls[1]).toMatchObject({ id: 'c1', to: '서류검토' })
+    expect(stageOf(client, 'c1')).toBe('서류검토') // 응답 전 낙관적 반영
+    expect(screen.queryByRole('button', { name: '되돌리기' })).not.toBeInTheDocument() // 누르면 토스트 닫힘
+
+    calls[1].resolve({ ...c, stage: '서류검토' })
+    await waitFor(() => expect(screen.getByRole('combobox', { name: '김서준 단계 이동' })).toBeEnabled())
+    expect(stageOf(client, 'c1')).toBe('서류검토')
+    expect(screen.queryByRole('button', { name: '되돌리기' })).not.toBeInTheDocument() // 되돌린 걸 또 되돌리는 토스트는 없음
+  })
+
+  it('되돌리기가 실패하면 롤백 + 재시도 토스트(에러 경로 그대로)', async () => {
+    const calls = controllable()
+    const client = setup(c)
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: '김서준 단계 이동' }), '면접')
+    calls[0].resolve({ ...c, stage: '면접' })
+    await userEvent.click(await screen.findByRole('button', { name: '되돌리기' }))
+    calls[1].reject(new ApiError('NETWORK', 503, true, '네트워크 오류'))
+    await waitFor(() => expect(stageOf(client, 'c1')).toBe('면접'))
+    expect(screen.getByRole('button', { name: '재시도' })).toBeInTheDocument()
+  })
 })

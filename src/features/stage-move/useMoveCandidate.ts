@@ -7,6 +7,8 @@ import { applyStage, rollbackStage } from './optimistic'
 export interface MoveInput {
   id: string
   to: Stage
+  /** 되돌리기로 발생한 이동이면 true — 성공해도 되돌리기 토스트를 다시 띄우지 않는다 */
+  isUndo?: boolean
 }
 
 const key = candidatesQueryOptions.queryKey
@@ -50,11 +52,21 @@ export function useMoveCandidate(candidateId: string) {
       const entry = inFlight.get(id)
       if (entry) entry.count += 1
       else if (previous) inFlight.set(id, { count: 1, confirmed: previous })
+      // 되돌리기의 목적지 = 이 이동 직전 단계. 연속 이동 중이면 앞 이동의 낙관적 값이지만, 그게 사용자가 "방금 전"으로 인식하는 상태다
+      return { previous }
     },
 
-    onSuccess: (updated) => {
+    onSuccess: (updated, vars, context) => {
       const entry = inFlight.get(updated.id)
       if (entry) entry.confirmed = updated.stage
+      if (!vars.isUndo && context?.previous) {
+        const previous = context.previous
+        toast.info(
+          `${updated.name}을(를) ${updated.stage}(으)로 옮겼습니다.`,
+          { label: '되돌리기', onClick: () => mutation.mutate({ id: updated.id, to: previous, isUndo: true }) },
+          `undo-${updated.id}`,
+        )
+      }
       // 뒤 요청이 진행 중이면 그 낙관적 값을 덮어쓰지 않는다 — 서버값은 확정값에만 반영
       if (entry && entry.count > 1) return
       queryClient.setQueryData(key, (list: Candidate[] | undefined) =>

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { toast, useToastStore } from './toastStore'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { INFO_TOAST_MS, toast, useToastStore } from './toastStore'
 
 describe('toastStore', () => {
   beforeEach(() => useToastStore.setState({ toasts: [] }))
@@ -16,5 +16,20 @@ describe('toastStore', () => {
     toast.error('a')
     toast.error('b')
     expect(useToastStore.getState().toasts).toHaveLength(2)
+  })
+
+  describe('자동 닫힘', () => {
+    beforeEach(() => vi.useFakeTimers())
+    afterEach(() => vi.useRealTimers())
+
+    it('info 토스트는 INFO_TOAST_MS 뒤에 사라지고, error 토스트는 남는다', () => {
+      toast.info('옮겼습니다')
+      toast.error('실패했습니다')
+      expect(useToastStore.getState().toasts).toHaveLength(2)
+      vi.advanceTimersByTime(INFO_TOAST_MS - 1)
+      expect(useToastStore.getState().toasts).toHaveLength(2)
+      vi.advanceTimersByTime(1)
+      expect(useToastStore.getState().toasts.map((t) => t.message)).toEqual(['실패했습니다'])
+    })
   })
 })
