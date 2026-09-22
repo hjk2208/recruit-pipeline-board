@@ -2,7 +2,7 @@
 
 채용 담당자가 지원자 카드를 `서류검토 → 면접 → 처우협의 → 최종합격 / 불합격` 단계로 옮기며 관리하는 보드. 백엔드 없이 자체 구현한 mock API(지연 200~800ms, 실패율 15%) 위에서 낙관적 업데이트와 롤백을 다룬다.
 
-**배포**: _(Vercel 링크 추가 예정)_
+**배포**: https://recruit-pipeline-board.vercel.app — 에러 화면은 [`?failRate=1`](https://recruit-pipeline-board.vercel.app/?failRate=1), 빈 상태는 [`?seed=0`](https://recruit-pipeline-board.vercel.app/?seed=0)
 
 ## 실행
 
@@ -18,7 +18,7 @@ pnpm dev        # http://localhost:5173
 | 하고 싶은 것 | 방법 |
 |---|---|
 | 낙관적 업데이트·롤백 | 카드의 단계 셀렉트를 바꾸면 즉시 옮겨지고, 15% 확률로 실패 → 원래 컬럼 복귀 + 재시도 토스트 |
-| 에러 화면 | `http://localhost:5173/?failRate=1` → 조회 실패 + 다시 시도 |
+| 에러 화면 | `?failRate=1` → 조회 실패 + 다시 시도 |
 | 빈 상태 | `?seed=0` (데이터 0건) / 검색어를 아무거나 |
 | 되돌리기 | 이동 성공 토스트의 [되돌리기] |
 | 키보드만으로 | Tab → 카드 이름에서 ↑/↓(같은 컬럼) ←/→(옆 컬럼), Enter 상세, Esc 닫기, 셀렉트로 이동 |
