@@ -15,7 +15,7 @@
 | 8 | detail-panel | PC 사이드 패널 / 모바일 전체 화면 시트, Esc 닫기, 포커스 복귀 | M5 | 미리보기 |
 | 9 | loading-error-empty | ErrorBoundary + 재시도, 빈 상태 2종. mock 옵션 오버라이드 진입점(`?failRate=1` 등) 추가 | M6 | 미리보기(실패율 100%로) |
 | 10 | a11y-keyboard | Tab/Enter, 이동 컨트롤 키보드, aria-live | S1 | 키보드만으로 시나리오 |
-| 11 | wrap-up | README·DECISIONS·PROMPTS 대조·최종 verify | 전체 | /wrap-up |
+| 11 | wrap-up | README·DECISIONS·PROMPTS 대조·최종 verify | 전체 | ✅ 1차(9/22) |
 
 ## 시간 되면 (Must 전부 ✅ 이후)
 | # | scope | 내용 |
