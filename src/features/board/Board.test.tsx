@@ -77,4 +77,17 @@ describe('Board', () => {
     // 이지우(백엔드)는 프론트엔드 필터에 걸려 0건 → 컬럼 대신 안내 문구
     expect(await screen.findByText(/조건에 맞는 지원자가 없습니다/)).toBeInTheDocument()
   })
+
+  it('낙관적으로 옮겨져 리마운트된 카드의 셀렉트도 응답 전엔 비활성이다', async () => {
+    let resolve!: (v: Candidate) => void
+    vi.mocked(api.moveCandidate).mockImplementation(() => new Promise<Candidate>((r) => (resolve = r)))
+    renderBoard()
+    await screen.findByRole('heading', { name: '서류검토' })
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: '김서준 단계 이동' }), '면접')
+    const interview = screen.getByRole('region', { name: '면접' })
+    await within(interview).findByText('김서준') // 응답 전에 이미 면접 컬럼
+    expect(within(interview).getByRole('combobox', { name: '김서준 단계 이동' })).toBeDisabled()
+    resolve({ ...list[0], stage: '면접' })
+    await waitFor(() => expect(within(interview).getByRole('combobox', { name: '김서준 단계 이동' })).toBeEnabled())
+  })
 })

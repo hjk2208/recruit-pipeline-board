@@ -37,10 +37,14 @@ function trackerOf(client: QueryClient): InFlight {
  * scope: 같은 카드의 요청은 순서대로 나간다(뒤 요청이 앞 요청을 추월하지 않게). 다른 카드는 병렬.
  * 목록 전체 스냅샷을 쓰지 않는 이유는 optimistic.ts 참조.
  */
+/** 카드별 mutation 키. 진행 여부를 컴포넌트 밖(useIsMutating)에서 읽을 때 쓴다 */
+export const moveMutationKey = (candidateId: string) => ['move', candidateId] as const
+
 export function useMoveCandidate(candidateId: string) {
   const queryClient = useQueryClient()
   const inFlight = trackerOf(queryClient)
   const mutation = useMutation({
+    mutationKey: moveMutationKey(candidateId),
     scope: { id: `move-${candidateId}` },
     mutationFn: ({ id, to }: MoveInput) => api.moveCandidate(id, to),
 
